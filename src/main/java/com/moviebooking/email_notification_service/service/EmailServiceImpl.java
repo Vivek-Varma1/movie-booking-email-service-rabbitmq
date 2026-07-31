@@ -1,19 +1,25 @@
 package com.moviebooking.email_notification_service.service;
 
 import com.moviebooking.email_notification_service.event.BookingConfirmedEvent;
-import com.moviebooking.email_notification_service.service.EmailService;
+import com.moviebooking.email_notification_service.event.OtpEvent;
+import jakarta.activation.DataSource;
+import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.format.DateTimeFormatter;
+
 
 @Slf4j
 @Service
@@ -27,23 +33,68 @@ public class EmailServiceImpl implements EmailService {
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm a");
 
+    private final Environment environment;
+    private final RestTemplate restTemplate;
+
+    @PostConstruct
+    public void verify() {
+        System.out.println("Username: " + environment.getProperty("MAIL_USERNAME"));
+        String password = environment.getProperty("MAIL_PASSWORD");
+
+        System.out.println("Username: " + environment.getProperty("MAIL_USERNAME"));
+        System.out.println("Password exists: " + (password != null));
+
+        if (password != null) {
+            System.out.println("Password length: " + password.length());
+        }
+    }
+
     @Override
-    public void sendBookingConfirmationEmail(BookingConfirmedEvent event) {
+    public void sendBookingConfirmationEmail(
+            BookingConfirmedEvent event) {
 
         try {
+            log.info("QR URL: '{}'", event.qrUrl());
 
-            MimeMessage message = mailSender.createMimeMessage();
+
+            byte[] qrImage =
+                    restTemplate.getForObject(
+                            event.qrUrl(),
+                            byte[].class
+                    );
+            log.info("QR URL received: '{}'", event.qrUrl());
+            MimeMessage message =
+                    mailSender.createMimeMessage();
 
             MimeMessageHelper helper =
-                    new MimeMessageHelper(message, true, "UTF-8");
+                    new MimeMessageHelper(
+                            message,
+                            true,
+                            "UTF-8"
+                    );
 
             helper.setTo(event.email());
 
             helper.setSubject(
-                    "🎬 Booking Confirmed | " + event.movie()
+                    "🎬 Booking Confirmed | "
+                            + event.movie()
             );
 
-            helper.setText(generateHtml(event), true);
+            helper.setText(
+                    generateHtml(event),
+                    true
+            );
+
+            DataSource dataSource =
+                    new ByteArrayDataSource(
+                            qrImage,
+                            "image/png"
+                    );
+
+            helper.addInline(
+                    "ticketQr",
+                    dataSource
+            );
 
             mailSender.send(message);
 
@@ -52,15 +103,44 @@ public class EmailServiceImpl implements EmailService {
                     event.email()
             );
 
-        } catch (MessagingException | MailException ex) {
+        }
+        catch (MessagingException | MailException ex) {
 
             log.error(
-                    "Failed to send booking confirmation email to {}",
-                    event.email(),
+                    "Failed to send booking confirmation email",
                     ex
             );
 
-            // Later we'll publish to Retry Topic / DLT here
+        }
+
+    }
+
+    @Override
+    public void sendOtpEmail(OtpEvent event) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
+
+            helper.setTo(event.email());
+            helper.setSubject("🔑 Your Verification Code / OTP");
+
+            // Simple HTML body for the OTP
+            String htmlContent = """
+                <div style="font-family: Arial, sans-serif; padding: 20px;">
+                    <h2>Verification Code</h2>
+                    <p>Your OTP code for login is:</p>
+                    <h1 style="color: #4CAF50; letter-spacing: 5px;">%s</h1>
+                    <p>This code will expire in 5 minutes. Do not share it with anyone.</p>
+                </div>
+                """.formatted(event.otpCode());
+
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+            log.info("OTP email successfully sent to {}", event.email());
+
+        } catch (MessagingException | MailException ex) {
+            log.error("Failed to send OTP email to {}", event.email(), ex);
         }
     }
 

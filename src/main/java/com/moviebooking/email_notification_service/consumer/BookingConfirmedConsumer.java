@@ -17,7 +17,8 @@ public class BookingConfirmedConsumer {
 
     @KafkaListener(
             topics = "booking-confirmed",
-            groupId = "notification-group"
+            groupId = "email-booking-group",
+            concurrency = "3"
     )
     public void consume(
             BookingConfirmedEvent event
@@ -34,4 +35,9 @@ public class BookingConfirmedConsumer {
         log.info("Confirmation email sent to {}", event.email());
     }
 
+//    @PostConstruct
+//    public void check() {
+//        System.out.println("Username = " + env.getProperty("MAIL_USERNAME"));
+//        System.out.println("Password exists = " + (env.getProperty("MAIL_PASSWORD") != null));
+//    }
 }
