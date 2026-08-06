@@ -1,10 +1,10 @@
 package com.moviebooking.email_notification_service.service;
 
 import com.moviebooking.email_notification_service.event.BookingConfirmedEvent;
-import com.moviebooking.email_notification_service.event.OtpEvent;
+import com.moviebooking.email_notification_service.event.OtpRequest;
 
 public interface EmailService {
 
     void sendBookingConfirmationEmail(BookingConfirmedEvent event);
-    void sendOtpEmail(OtpEvent event);
+    void sendOtpEmail(OtpRequest event);
 }

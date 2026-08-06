@@ -1,7 +1,7 @@
 package com.moviebooking.email_notification_service.service;
 
 import com.moviebooking.email_notification_service.event.BookingConfirmedEvent;
-import com.moviebooking.email_notification_service.event.OtpEvent;
+import com.moviebooking.email_notification_service.event.OtpRequest;
 import jakarta.activation.DataSource;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
@@ -116,7 +116,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendOtpEmail(OtpEvent event) {
+    public void sendOtpEmail(OtpRequest event) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");

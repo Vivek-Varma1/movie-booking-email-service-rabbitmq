@@ -4,11 +4,9 @@ spring:
   application:
     name: email-notification-service
 
-  Kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: notification-group
-      auto-offset-reset: earliest
+  rabbitmq:
+    addresses: ${RABBITMQ_URL}
+
   mail:
 
     host: smtp.gmail.com

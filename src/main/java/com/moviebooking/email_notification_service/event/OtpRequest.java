@@ -1,7 +1,5 @@
 package com.moviebooking.email_notification_service.event;
-
-public record OtpEvent(
+public record OtpRequest(
         String email,
         String otpCode
-) {
-}
+) {}
