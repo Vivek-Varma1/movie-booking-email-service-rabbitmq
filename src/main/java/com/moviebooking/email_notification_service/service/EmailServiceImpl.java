@@ -177,59 +177,75 @@ public class EmailServiceImpl implements EmailService {
     /**
      * Generates HTML using Thymeleaf.
      */
+//    private String generateHtml(BookingConfirmedEvent event) {
+//
+//        Context context = new Context();
+//
+//        context.setVariable(
+//                "bookingId",
+//                event.bookingId()
+//        );
+//
+//        context.setVariable(
+//                "ticketNumber",
+//                event.ticketNumber()
+//        );
+//
+//        context.setVariable(
+//                "userName",
+//                event.userName()
+//        );
+//
+//        context.setVariable(
+//                "movieName",
+//                event.movie()
+//        );
+//
+//        context.setVariable(
+//                "theatreName",
+//                event.theatre()
+//        );
+//
+//        context.setVariable(
+//                "screenName",
+//                event.screen()
+//        );
+//
+//        context.setVariable(
+//                "showTime",
+//                event.showTime().format(FORMATTER)
+//        );
+//
+//        context.setVariable(
+//                "seats",
+//                String.join(", ", event.seats())
+//        );
+//
+//        context.setVariable(
+//                "year",
+//                java.time.Year.now().getValue()
+//        );
+//
+//        return templateEngine.process(
+//                "booking-confirmation",
+//                context
+//        );
+//    }
     private String generateHtml(BookingConfirmedEvent event) {
-
         Context context = new Context();
 
-        context.setVariable(
-                "bookingId",
-                event.bookingId()
-        );
+        context.setVariable("bookingId", event.bookingId());
+        context.setVariable("ticketNumber", event.ticketNumber());
+        context.setVariable("userName", event.userName());
+        context.setVariable("movieName", event.movie());
+        context.setVariable("theatreName", event.theatre());
+        context.setVariable("screenName", event.screen());
+        context.setVariable("showTime", event.showTime().format(FORMATTER));
+        context.setVariable("seats", String.join(", ", event.seats()));
+        context.setVariable("qrUrl", event.qrUrl()); // <-- Added qrUrl context variable
+        context.setVariable("year", java.time.Year.now().getValue());
 
-        context.setVariable(
-                "ticketNumber",
-                event.ticketNumber()
-        );
-
-        context.setVariable(
-                "userName",
-                event.userName()
-        );
-
-        context.setVariable(
-                "movieName",
-                event.movie()
-        );
-
-        context.setVariable(
-                "theatreName",
-                event.theatre()
-        );
-
-        context.setVariable(
-                "screenName",
-                event.screen()
-        );
-
-        context.setVariable(
-                "showTime",
-                event.showTime().format(FORMATTER)
-        );
-
-        context.setVariable(
-                "seats",
-                String.join(", ", event.seats())
-        );
-
-        context.setVariable(
-                "year",
-                java.time.Year.now().getValue()
-        );
-
-        return templateEngine.process(
-                "booking-confirmation",
-                context
-        );
+        return templateEngine.process("booking-confirmation", context);
     }
 
 }

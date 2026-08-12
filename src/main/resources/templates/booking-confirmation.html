@@ -292,11 +292,15 @@
 
             <h3>Your Ticket QR Code</h3>
 
-            <img
-                    src="cid:ticketQr"
-                    alt="Ticket QR"
-                    width="220"
-                    height="220"/>
+<!--            <img-->
+<!--                    src="cid:ticketQr"-->
+<!--                    alt="Ticket QR"-->
+<!--                    width="220"-->
+<!--                    height="220"/>-->
+            <img th:src="${qrUrl}"
+                 alt="Ticket QR"
+                 width="220"
+                 height="220"/>
 
         </div>
 
