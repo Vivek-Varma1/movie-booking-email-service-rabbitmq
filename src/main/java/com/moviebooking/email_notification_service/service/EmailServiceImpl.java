@@ -10,10 +10,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 
 
 @Slf4j
@@ -23,6 +25,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final Resend resend;
     private final SpringTemplateEngine templateEngine;
+    private final RestTemplate restTemplate;
 
     @Value("${resend.from}")
     private String fromEmail;
@@ -245,6 +248,16 @@ public class EmailServiceImpl implements EmailService {
         context.setVariable("qrUrl", event.qrUrl()); // <-- Added qrUrl context variable
         context.setVariable("year", java.time.Year.now().getValue());
 
+        try {
+            byte[] qrBytes = restTemplate.getForObject(event.qrUrl(), byte[].class);
+            if (qrBytes != null) {
+                String base64Qr = "data:image/png;base64," + Base64.getEncoder().encodeToString(qrBytes);
+                context.setVariable("qrImage", base64Qr);
+            }
+        } catch (Exception ex) {
+            log.error("Failed to download QR image from URL: {}", event.qrUrl(), ex);
+            context.setVariable("qrImage", "");
+        }
         return templateEngine.process("booking-confirmation", context);
     }
 

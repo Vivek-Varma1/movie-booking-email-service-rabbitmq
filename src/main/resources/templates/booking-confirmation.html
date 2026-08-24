@@ -287,21 +287,10 @@
 
         </table>
 
-        <!-- We'll replace this placeholder with the actual QR image in Part 3 -->
-        <div class="qr">
-
+        <!-- Conditionally render QR section -->
+        <div class="qr" th:if="${qrImage != null and !#strings.isEmpty(qrImage)}">
             <h3>Your Ticket QR Code</h3>
-
-<!--            <img-->
-<!--                    src="cid:ticketQr"-->
-<!--                    alt="Ticket QR"-->
-<!--                    width="220"-->
-<!--                    height="220"/>-->
-            <img th:src="${qrUrl}"
-                 alt="Ticket QR"
-                 width="220"
-                 height="220"/>
-
+            <img th:src="${qrImage}" alt="Ticket QR Code" style="width: 200px; height: 200px;" />
         </div>
 
     </div>
