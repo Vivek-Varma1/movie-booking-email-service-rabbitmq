@@ -1,26 +1,21 @@
-FROM eclipse-temurin:21-jdk AS build
-
+# Stage 1: Build the application
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Install Maven, clean apt caches to shrink image layer size, and download dependencies offline first
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends maven && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy build definition files first to leverage Docker layer caching
+# Copy pom.xml and download dependencies to leverage Docker cache
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy remaining source code and build final executable JAR
+# Copy source code and build final jar
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn package -DskipTests
 
-FROM eclipse-temurin:21-jre
-
+# Stage 2: Minimal Runtime container
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
+# Copy compiled artifact from build stage
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
