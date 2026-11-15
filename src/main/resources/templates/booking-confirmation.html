@@ -288,10 +288,21 @@
         </table>
 
         <!-- Conditionally render QR section -->
-        <div class="qr" th:if="${qrImage != null and !#strings.isEmpty(qrImage)}">
+        <!-- <div class="qr" th:if="${qrImage != null and !#strings.isEmpty(qrImage)}">
             <h3>Your Ticket QR Code</h3>
             <img th:src="${qrImage}" alt="Ticket QR Code" style="width: 200px; height: 200px;" />
-        </div>
+        </div> -->
+        
+<div class="qr" th:if="${qrUrl != null and !#strings.isEmpty(qrUrl)}">
+    <h3>Your Ticket QR Code</h3>
+
+    <img th:src="${qrUrl}"
+         alt="Ticket QR Code"
+         width="200"
+         height="200"
+         style="display:block; margin:20px auto; width:200px; height:200px; border:0;" />
+</div>
+
 
     </div>
 
