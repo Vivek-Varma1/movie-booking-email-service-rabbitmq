@@ -234,31 +234,51 @@ public class EmailServiceImpl implements EmailService {
 //                context
 //        );
 //    }
+    // private String generateHtml(BookingConfirmedEvent event) {
+    //     Context context = new Context();
+
+    //     context.setVariable("bookingId", event.bookingId());
+    //     context.setVariable("ticketNumber", event.ticketNumber());
+    //     context.setVariable("userName", event.userName());
+    //     context.setVariable("movieName", event.movie());
+    //     context.setVariable("theatreName", event.theatre());
+    //     context.setVariable("screenName", event.screen());
+    //     context.setVariable("showTime", event.showTime().format(FORMATTER));
+    //     context.setVariable("seats", String.join(", ", event.seats()));
+    //     context.setVariable("qrUrl", event.qrUrl()); // <-- Added qrUrl context variable
+    //     context.setVariable("year", java.time.Year.now().getValue());
+
+    //     try {
+    //         byte[] qrBytes = restTemplate.getForObject(event.qrUrl(), byte[].class);
+    //         if (qrBytes != null) {
+    //             String base64Qr = "data:image/png;base64," + Base64.getEncoder().encodeToString(qrBytes);
+    //             context.setVariable("qrImage", base64Qr);
+    //         }
+    //     } catch (Exception ex) {
+    //         log.error("Failed to download QR image from URL: {}", event.qrUrl(), ex);
+    //         context.setVariable("qrImage", "");
+    //     }
+    //     return templateEngine.process("booking-confirmation", context);
+    // }
     private String generateHtml(BookingConfirmedEvent event) {
-        Context context = new Context();
+    Context context = new Context();
 
-        context.setVariable("bookingId", event.bookingId());
-        context.setVariable("ticketNumber", event.ticketNumber());
-        context.setVariable("userName", event.userName());
-        context.setVariable("movieName", event.movie());
-        context.setVariable("theatreName", event.theatre());
-        context.setVariable("screenName", event.screen());
-        context.setVariable("showTime", event.showTime().format(FORMATTER));
-        context.setVariable("seats", String.join(", ", event.seats()));
-        context.setVariable("qrUrl", event.qrUrl()); // <-- Added qrUrl context variable
-        context.setVariable("year", java.time.Year.now().getValue());
+    context.setVariable("bookingId", event.bookingId());
+    context.setVariable("ticketNumber", event.ticketNumber());
+    context.setVariable("userName", event.userName());
+    context.setVariable("movieName", event.movie());
+    context.setVariable("theatreName", event.theatre());
+    context.setVariable("screenName", event.screen());
+    context.setVariable("showTime", event.showTime().format(FORMATTER));
+    context.setVariable("seats", String.join(", ", event.seats()));
 
-        try {
-            byte[] qrBytes = restTemplate.getForObject(event.qrUrl(), byte[].class);
-            if (qrBytes != null) {
-                String base64Qr = "data:image/png;base64," + Base64.getEncoder().encodeToString(qrBytes);
-                context.setVariable("qrImage", base64Qr);
-            }
-        } catch (Exception ex) {
-            log.error("Failed to download QR image from URL: {}", event.qrUrl(), ex);
-            context.setVariable("qrImage", "");
-        }
-        return templateEngine.process("booking-confirmation", context);
-    }
+    // Use the actual QR endpoint from the event
+    context.setVariable("qrUrl", event.qrUrl());
 
+    context.setVariable("year", java.time.Year.now().getValue());
+
+    log.info("Booking email QR URL: {}", event.qrUrl());
+
+    return templateEngine.process("booking-confirmation", context);
+}
 }
